@@ -47,7 +47,7 @@ void InventoryManager::borrowItem(int itemId, const string& username) {
     }
 
     // Item with ID itemId does not exist
-    throw std::runtime_error("Item with ID=" + to_string(itemId) + " does not exist.");
+    throw runtime_error("Item with ID=" + to_string(itemId) + " does not exist.");
 }
 
 // Return a borrwed item back to the inventory
@@ -66,7 +66,7 @@ void InventoryManager::returnItem(int itemId, const string& username) {
     }
 
     // Item with ID itemId does not exist
-    throw std::runtime_error("Item with ID=" + to_string(itemId) + " does not exist.");
+    throw runtime_error("Item with ID=" + to_string(itemId) + " does not exist.");
 }
 
 // Keep the client waiting until an item is available again

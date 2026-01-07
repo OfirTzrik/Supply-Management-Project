@@ -1,6 +1,6 @@
 #include "Item.h"
 Item::Item(int id ,const string& name):
-    id(id) ,name(name) , isBorrowed(false) , borrowedBY(nullptr){}
+    id(id) ,name(name) , isBorrowed(false) , borrowedBY(""){}
 
 int Item::getId(){
     return id;
@@ -28,9 +28,9 @@ void Item::returnBack(const string& username){
     borrowedBY = nullptr;
 }
 string Item::toString(){
-    string s1 = to_string(id);
+    string s1 = to_string(id) + " " + name;
     if (isBorrowed){
-        return "ID: " + s1 + " Borrowed By: " + borrowedBY;
+        return s1 + " Borrowed By: " + borrowedBY;
     } 
-    return "ID: " + s1 +  "Item is free";
+    return s1 +  " Item is free";
 }

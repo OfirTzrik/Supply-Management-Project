@@ -20,7 +20,7 @@ public:
     void borrow(const string& username);
     void returnBack(const string& username);
     string toString();
-    ~Item();
+    ~Item() = default;
 };
 
 

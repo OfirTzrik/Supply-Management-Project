@@ -25,7 +25,7 @@ void Item::returnBack(const string& username){
     if (isBorrowed == false) throw runtime_error("The Item is not borrowed");
     if (username != borrowedBY) throw invalid_argument("you are not the one how borrowed it");
     isBorrowed = false;
-    borrowedBY = nullptr;
+    borrowedBY = "";
 }
 string Item::toString(){
     string s1 = to_string(id) + " " + name;

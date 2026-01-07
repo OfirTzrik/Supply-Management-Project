@@ -9,7 +9,7 @@ string& Item::getName(){
     return name;
 }
 bool Item::isAvailable(){
-    return isBorrowed;
+    return !isBorrowed;
 }
 string& Item::getBorrower(){
     return borrowedBY;

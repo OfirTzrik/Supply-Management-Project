@@ -33,5 +33,4 @@ string Item::toString(){
         return "ID: " + s1 + " Borrowed By: " + borrowedBY;
     } 
     return "ID: " + s1 +  "Item is free";
-
 }

@@ -16,7 +16,6 @@ public:
     int getId();
     string& getName();
     bool isAvailable();
-    bool isAvailable();
     string& getBorrower();
     void borrow(const string& username);
     void returnBack(const string& username);

@@ -150,13 +150,6 @@ git push
 
 ## Getting your work into `main`
 
-### Recommended: Open a Pull Request (PR)
-1. Push your branch (`git push -u origin ...`)
-2. Open a PR on GitHub/GitLab from your branch → `main`
-3. Merge when ready
-
-This avoids “oops I pushed broken stuff to main”.
-
 ### Alternative: Merge directly to `main` (only if you’re careful)
 This is allowed since you have no rulesets, but it’s riskier.
 

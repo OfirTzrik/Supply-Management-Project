@@ -6,6 +6,14 @@ int main() {
     // cout << itm.toString() << "\n";
 
     cout << inv.listItems();
+    
+    inv.borrowItem(70, "Ofir");
+    
+    cout << "\n" + inv.listItems();
+
+    inv.waitUntilAvailable(70, "Omer");
+
+    cout << "\n" + inv.listItems();
 
     return 0;
 }

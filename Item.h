@@ -18,8 +18,9 @@ public:
     bool isAvailable();
     bool isAvailable();
     string& getBorrower();
-    void Borrow(const string& username);
+    void borrow(const string& username);
     void returnBack(const string& username);
+    string toString();
     ~Item();
 };
 

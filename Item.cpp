@@ -16,14 +16,14 @@ string& Item::getBorrower(){
 }
 
 void Item::borrow(const string& username){
-    if (isBorrowed) throw runtime_error("Item is allready borrowed");
+    if (isBorrowed) throw runtime_error("Item is already borrowed");
     if (username.empty()) throw invalid_argument("username is in valide");
     isBorrowed = true;
     borrowedBY = username;
 }
 void Item::returnBack(const string& username){
     if (isBorrowed == false) throw runtime_error("The Item is not borrowed");
-    if (username != borrowedBY) throw invalid_argument("you are not the one how borrowed it");
+    if (username != borrowedBY) throw invalid_argument("you are not the one who borrowed it");
     isBorrowed = false;
     borrowedBY = "";
 }

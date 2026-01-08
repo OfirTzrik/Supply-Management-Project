@@ -71,21 +71,22 @@ void InventoryManager::returnItem(int itemId, const string& username) {
 
 // Keep the client waiting until an item is available again
 void InventoryManager::waitUntilAvailable(int itemId, const string& username) {
-    Item* itm;
-
     try {
-        itm = &findItemById(itemId);
+        Item& itm = findItemById(itemId);
+
+        // Client will keep waiting until available
+        unique_lock<mutex> ulock(mtx);
+
+        while(!itm.isAvailable()) {
+            cv.wait(ulock);
+        }
+
     } catch (const char* msg) {
         cerr << msg << "\n";
         return;
     }
 
-    // Client will keep waiting until available
-    unique_lock<mutex> ulock(mtx);
-
-    while(!(*itm).isAvailable()) {
-        cv.wait(ulock);
-    }
+    
 }
 
 // Search for an item given its ID in the inventory

@@ -61,7 +61,7 @@ int main(int argc, char const *argv[]) {
     // sending messeges 
     while(true){
         string sentence;
-        cin >> sentence ;
+        getline(cin, sentence) ;
 
         string msg = sentence + "\n";
         send_all(fd, msg);

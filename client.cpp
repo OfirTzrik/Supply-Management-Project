@@ -52,6 +52,10 @@ int main(int argc, char const *argv[]) {
         cerr << "Server not found";
         close(fd);
     }
+    cout << "Connected to " + ip +":" + to_string(port);
+    string reply;
+    recv_line(fd, reply);
+    cout << reply << endl;
     
     // sending messeges 
     while(true){

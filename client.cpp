@@ -30,7 +30,17 @@ void send_all(int fd, const string& msg) {
     }
 }
 
-void client_thread(string& ip , int port) {
+
+int main(int argc, char const *argv[]) {
+    if (argc < 3){
+    cout << "missing values";
+    return 0;
+    }
+    string ip = (argv[1]);
+    int port = atoi(argv[2]);
+
+    // start the connection 
+
     int fd = socket(AF_INET, SOCK_STREAM, 0);
 
     sockaddr_in srv{};
@@ -43,7 +53,7 @@ void client_thread(string& ip , int port) {
         close(fd);
     }
     
-
+    // sending messeges 
     while(true){
         string sentence;
         cin >> sentence ;
@@ -62,17 +72,6 @@ void client_thread(string& ip , int port) {
     }
 
     close(fd);
-}
 
-int main(int argc, char const *argv[]) {
-    if (argc < 3){
-    cout << "missing values";
-    return 0;
-    }
-    string ip = (argv[1]);
-    int port = atoi(argv[2]);
 
-    thread worker(client_thread, ip , port);
-
-    worker.join();
 }

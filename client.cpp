@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <thread>
 #include <vector>
 
@@ -17,6 +18,25 @@ bool recv_line(int fd, string& out) {
         if (n <= 0) return false;
         if (c == '\n') break;
         out.push_back(c);
+    }
+    istringstream iss(out);
+    vector<string> words;
+    string w;
+    while (iss >> w) {
+        words.push_back(w);
+    }
+    if (words.size() == 3)
+    {
+        int count = 0;
+        if(words[1] == "LIST"){
+            count = atoi(words[2].c_str());
+                while (count > 0) {
+                    ssize_t n = recv(fd, &c, 1, 0);
+                    if (n <= 0) return false;
+                    if (c == '\n') count --;
+                    out.push_back(c);
+                }
+        }
     }
     return true;
 }

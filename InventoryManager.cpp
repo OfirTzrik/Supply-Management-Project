@@ -40,8 +40,8 @@ void InventoryManager::borrowItem(int itemId, const string& username) {
         itm.borrow(username);
         mtx.unlock();
         return;
-    } catch (const char* msg) {
-        cerr << msg << "\n";
+    } catch (const runtime_error& msg) {
+        cerr << msg.what() << "\n";
         mtx.unlock();
         return;
     }
@@ -59,8 +59,8 @@ void InventoryManager::returnItem(int itemId, const string& username) {
         itm.returnBack(username);
         mtx.unlock();
         return;
-    } catch (const char* msg) {
-        cerr << msg << "\n";
+    } catch (const runtime_error& msg) {
+        cerr << msg.what() << "\n";
         mtx.unlock();
         return;
     }
@@ -81,8 +81,8 @@ void InventoryManager::waitUntilAvailable(int itemId, const string& username) {
             cv.wait(ulock);
         }
 
-    } catch (const char* msg) {
-        cerr << msg << "\n";
+    } catch (const runtime_error& msg) {
+        cerr << msg.what() << "\n";
         return;
     }
 

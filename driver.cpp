@@ -9,11 +9,9 @@ int main() {
     
     inv.borrowItem(70, "Ofir");
     
-    cout << "\n" + inv.listItems();
+    cout << "\n" + inv.listItems() + "\n";
 
-    inv.waitUntilAvailable(70, "Omer");
-
-    cout << "\n" + inv.listItems();
+    inv.borrowItem(70, "Omer");
 
     return 0;
 }

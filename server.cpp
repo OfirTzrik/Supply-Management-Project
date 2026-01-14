@@ -46,7 +46,7 @@ void send_all(int fd, const std::string& msg) {
 }
 
 void handle_client(int client_fd, InventoryManager& inv) {
-    send_all(client_fd, "Type commands: HELLO <username>, LIST, BORROW <id>, WAIT <id>");
+    send_all(client_fd, "Type commands: HELLO <username>, LIST, BORROW <id>, WAIT <id>\n");
 
     // Keep receiving messages until the client says QUIT
     while (true) {
@@ -55,31 +55,29 @@ void handle_client(int client_fd, InventoryManager& inv) {
         string username;
 
         // Keep waiting for the client to authenticate
-        while (!auth) {
-            if (!recv_line(client_fd, message_buffer)) {
-                close(client_fd);
-                return;
-            }
-
-            // Split message into words
-            istringstream iss(message_buffer);
-            vector<string> words;
-            string w;
-            while (iss >> w) {
-                words.push_back(w);
-            }
-
-            if (words.at(0) == "QUIT") {
-                send_all(client_fd, "OK BYE");
-                cout << "Client disconnected\n";
-                close(client_fd);
-            } else if (words.size() == 2 && words.at(0) == "HELLO") {
-                auth = true;
-                username = words.at(1);
-            }
-
+        if (!recv_line(client_fd, message_buffer)) {
+            close(client_fd);
+            return;
         }
-        
+        cout << message_buffer << "\n";
+
+        // Split message into words
+        istringstream iss(message_buffer);
+        vector<string> words;
+        string w;
+        while (iss >> w) {
+            words.push_back(w);
+        }
+
+        if (words.at(0) == "QUIT") {
+            send_all(client_fd, "OK BYE\n");
+            cout << "Client disconnected\n";
+            close(client_fd);
+            return;
+        } else if (words.size() == 2 && words.at(0) == "HELLO") {
+            auth = true;
+            username = words.at(1);
+        }
 
     }
 }

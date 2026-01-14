@@ -1,0 +1,78 @@
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <unistd.h>
+
+#include <iostream>
+#include <string>
+#include <thread>
+#include <vector>
+
+using namespace std;
+
+bool recv_line(int fd, string& out) {
+    out.clear();
+    char c;
+    while (true) {
+        ssize_t n = recv(fd, &c, 1, 0);
+        if (n <= 0) return false;
+        if (c == '\n') break;
+        out.push_back(c);
+    }
+    return true;
+}
+
+void send_all(int fd, const string& msg) {
+    size_t sent = 0;
+    while (sent < msg.size()) {
+        ssize_t n = send(fd, msg.data() + sent, msg.size() - sent, 0);
+        if (n <= 0) return;
+        sent += n;
+    }
+}
+
+void client_thread(string& ip , int port) {
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
+
+    sockaddr_in srv{};
+    srv.sin_family = AF_INET;
+    srv.sin_port = htons(port);
+    inet_pton(AF_INET, ip.c_str() , &srv.sin_addr);
+
+    if (connect(fd, (sockaddr*)&srv, sizeof(srv)) < 0){
+        cerr << "Server not found";
+        close(fd);
+    }
+    
+
+    while(true){
+        string sentence;
+        cin >> sentence ;
+
+        string msg = sentence + "\n";
+        send_all(fd, msg);
+
+        string reply;
+        if (!recv_line(fd, reply)){
+            cerr << "Disconnected form server";
+            break;
+        }
+        cout << reply << endl;
+
+        if (sentence == "QUIT") break;
+    }
+
+    close(fd);
+}
+
+int main(int argc, char const *argv[]) {
+    if (argc < 3){
+    cout << "missing values";
+    return 0;
+    }
+    string ip = (argv[1]);
+    int port = atoi(argv[2]);
+
+    thread worker(client_thread, ip , port);
+
+    worker.join();
+}

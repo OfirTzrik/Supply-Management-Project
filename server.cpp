@@ -89,6 +89,9 @@ void handle_client(int client_fd, InventoryManager& inv) {
             if (words.size() == 1 && words.at(0) == "LIST") {
                 std::string list = inv.listItems();
                 send_all(client_fd, list);
+            } else {
+                cout << "TEST\n";
+                send_all(client_fd, "WTF IS GOING ON\n");
             }
         }
 

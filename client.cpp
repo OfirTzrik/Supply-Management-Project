@@ -62,7 +62,7 @@ int main(int argc, char const *argv[]) {
         send_all(fd, msg);
 
         string reply;
-        if (!recv_line(fd, reply)){
+        if (!recv_line(fd, reply) && sentence != "QUIT"){
             cerr << "Disconnected form server";
             break;
         }

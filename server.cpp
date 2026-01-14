@@ -48,18 +48,16 @@ void send_all(int fd, const std::string& msg) {
 void handle_client(int client_fd, InventoryManager& inv) {
     send_all(client_fd, "Type commands: HELLO <username>, LIST, BORROW <id>, WAIT <id>\n");
 
+    string message_buffer;
+    bool auth = false;
+    string username;
+
     // Keep receiving messages until the client says QUIT
     while (true) {
-        string message_buffer;
-        bool auth = false;
-        string username;
-
-        // Keep waiting for the client to authenticate
         if (!recv_line(client_fd, message_buffer)) {
             close(client_fd);
             return;
         }
-        cout << message_buffer << "\n";
 
         // Split message into words
         istringstream iss(message_buffer);
@@ -68,6 +66,7 @@ void handle_client(int client_fd, InventoryManager& inv) {
         while (iss >> w) {
             words.push_back(w);
         }
+        cout << words.size() << "\n";
 
         if (words.at(0) == "QUIT") {
             send_all(client_fd, "OK BYE\n");
@@ -77,6 +76,16 @@ void handle_client(int client_fd, InventoryManager& inv) {
         } else if (words.size() == 2 && words.at(0) == "HELLO") {
             auth = true;
             username = words.at(1);
+            send_all(client_fd, "OK HELLO\n");
+            continue;
+        } else {
+            send_all(client_fd, "ERR: Invalid command \'" + message_buffer + "\'\n");
+        }
+
+        if (auth) {
+            if (words.size() == 1 && words.at(0) == "LIST") {
+                send_all(client_fd, inv.listItems());
+            }
         }
 
     }

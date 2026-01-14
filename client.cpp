@@ -51,8 +51,9 @@ int main(int argc, char const *argv[]) {
     if (connect(fd, (sockaddr*)&srv, sizeof(srv)) < 0){
         cerr << "Server not found";
         close(fd);
+        return 0;
     }
-    cout << "Connected to " + ip +":" + to_string(port);
+    cout << "Connected to " << ip << ":" << to_string(port) << endl;
     string reply;
     recv_line(fd, reply);
     cout << reply << endl;
@@ -67,7 +68,7 @@ int main(int argc, char const *argv[]) {
 
         string reply;
         if (!recv_line(fd, reply) && sentence != "QUIT"){
-            cerr << "Disconnected form server";
+            cerr << "Disconnected from server";
             break;
         }
         cout << reply << endl;

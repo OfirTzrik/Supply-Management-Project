@@ -73,18 +73,22 @@ void handle_client(int client_fd, InventoryManager& inv) {
             cout << "Client disconnected\n";
             close(client_fd);
             return;
-        } else if (words.size() == 2 && words.at(0) == "HELLO") {
-            auth = true;
-            username = words.at(1);
-            send_all(client_fd, "OK HELLO\n");
-            continue;
-        } else {
-            send_all(client_fd, "ERR: Invalid command \'" + message_buffer + "\'\n");
+        }
+        if (!auth) {
+            if (words.size() == 2 && words.at(0) == "HELLO") {
+                auth = true;
+                username = words.at(1);
+                send_all(client_fd, "OK HELLO\n");
+                continue;
+            } else {
+                send_all(client_fd, "ERR: Invalid command \'" + message_buffer + "\'\n");
+            }
         }
 
         if (auth) {
             if (words.size() == 1 && words.at(0) == "LIST") {
-                send_all(client_fd, inv.listItems());
+                std::string list = inv.listItems();
+                send_all(client_fd, list);
             }
         }
 

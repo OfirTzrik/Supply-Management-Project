@@ -29,13 +29,14 @@ bool recv_line(int fd, string& out) {
     {
         int count = 0;
         if(words[1] == "LIST"){
+            out.push_back('\n');
             count = atoi(words[2].c_str());
-                while (count > 0) {
-                    ssize_t n = recv(fd, &c, 1, 0);
-                    if (n <= 0) return false;
-                    if (c == '\n') count --;
-                    out.push_back(c);
-                }
+            while (count > 0) {
+                ssize_t n = recv(fd, &c, 1, 0);
+                if (n <= 0) return false;
+                if (c == '\n') count --;
+                out.push_back(c);
+            }
         }
     }
     return true;

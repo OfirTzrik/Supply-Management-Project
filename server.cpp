@@ -46,6 +46,8 @@ void send_all(int fd, const std::string& msg) {
 }
 
 void handle_client(int client_fd, InventoryManager& inv) {
+    send_all(client_fd, "Type commands: HELLO <username>, LIST, BORROW <id>, WAIT <id>");
+
     // Keep receiving messages until the client says QUIT
     while (true) {
         string message_buffer;
@@ -59,10 +61,10 @@ void handle_client(int client_fd, InventoryManager& inv) {
                 return;
             }
 
+            // Split message into words
             istringstream iss(message_buffer);
             vector<string> words;
             string w;
-
             while (iss >> w) {
                 words.push_back(w);
             }

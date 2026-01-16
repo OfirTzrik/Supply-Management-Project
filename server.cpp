@@ -61,12 +61,19 @@ void handle_client(int client_fd, InventoryManager& inv) {
 
         // Split message into words
         istringstream iss(message_buffer);
-        vector<string> words;
+        vector<string> words {};
         string w;
         while (iss >> w) {
+            cout << "REACHED 5\n";
             words.push_back(w);
         }
-        cout << words.size() << "\n";
+
+        if (words.size() == 0) {
+            send_all(client_fd, "OK BYE\n");
+            cout << "Client disconnected\n";
+            close(client_fd);
+            return;
+        }
 
         if (words.at(0) == "QUIT") {
             send_all(client_fd, "OK BYE\n");

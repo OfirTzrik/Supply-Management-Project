@@ -64,10 +64,10 @@ void handle_client(int client_fd, InventoryManager& inv) {
         vector<string> words {};
         string w;
         while (iss >> w) {
-            cout << "REACHED 5\n";
             words.push_back(w);
         }
 
+        // Handle empty messages (which gives an empty vector)
         if (words.size() == 0) {
             send_all(client_fd, "OK BYE\n");
             cout << "Client disconnected\n";
@@ -81,6 +81,8 @@ void handle_client(int client_fd, InventoryManager& inv) {
             close(client_fd);
             return;
         }
+
+        // User is not yet authenticated
         if (!auth) {
             if (words.size() == 2 && words.at(0) == "HELLO") {
                 auth = true;
@@ -92,12 +94,12 @@ void handle_client(int client_fd, InventoryManager& inv) {
             }
         }
 
+        // User performed authentication with HELLO <username>
         if (auth) {
             if (words.size() == 1 && words.at(0) == "LIST") {
                 std::string list = inv.listItems();
                 send_all(client_fd, list);
             } else {
-                cout << "TEST\n";
                 send_all(client_fd, "WTF IS GOING ON\n");
             }
         }

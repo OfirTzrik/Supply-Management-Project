@@ -45,6 +45,38 @@ void send_all(int fd, const std::string& msg) {
     }
 }
 
+// Handle empty messages from the client and the QUIT command
+bool disconnectClient(vector<string>& words, int client_fd) {
+    if (words.size() == 0 || words.at(0) == "QUIT") {
+        send_all(client_fd, "OK BYE\n");
+        cout << "Client disconnected\n";
+        close(client_fd);
+        return true;
+    }
+    return false;
+}
+
+/* As long at the client did not authenticate they will only
+have the HELLO command available to them, otherwise every other
+command is not available */
+bool authenticationLoop(vector<string>& words, bool& auth, int client_fd, string& username, const string& message_buffer) {
+    if (!auth) {
+        // Client authenticated
+        if (words.size() == 2 && words.at(0) == "HELLO") {
+            auth = true;
+            username = words.at(1);
+            send_all(client_fd, "OK HELLO\n");
+            return true;
+        // Client did not authenticate
+        } else if (words.at(0) == "LIST" || words.at(0) == "BORROW" || words.at(0) == "WAIT") {
+            send_all(client_fd, "ERR: User is not yet authenticated\n");
+        } else {
+            send_all(client_fd, "ERR: Invalid command \'" + message_buffer + "\'\n");
+        }
+    }
+    return false;
+}
+
 void handle_client(int client_fd, InventoryManager& inv) {
     send_all(client_fd, "Type commands: HELLO <username>, LIST, BORROW <id>, WAIT <id>\n");
 
@@ -67,34 +99,19 @@ void handle_client(int client_fd, InventoryManager& inv) {
             words.push_back(w);
         }
 
-        // Handle empty messages (which gives an empty vector)
-        if (words.size() == 0) {
-            send_all(client_fd, "OK BYE\n");
-            cout << "Client disconnected\n";
-            close(client_fd);
+        /* Handle empty messages (which results in empty words vector)
+        and also handle the client sending "QUIT" */
+        if (disconnectClient(words, client_fd)) {
             return;
         }
 
-        if (words.at(0) == "QUIT") {
-            send_all(client_fd, "OK BYE\n");
-            cout << "Client disconnected\n";
-            close(client_fd);
-            return;
+        /* Authenticate the client once they use HELLO <username>,
+        otherwise they are "stuck" here */
+        if (authenticationLoop(words, auth, client_fd, username, message_buffer)) {
+            continue;
         }
 
-        // User is not yet authenticated
-        if (!auth) {
-            if (words.size() == 2 && words.at(0) == "HELLO") {
-                auth = true;
-                username = words.at(1);
-                send_all(client_fd, "OK HELLO\n");
-                continue;
-            } else {
-                send_all(client_fd, "ERR: Invalid command \'" + message_buffer + "\'\n");
-            }
-        }
-
-        // User performed authentication with HELLO <username>
+        // User is already authenticated
         if (auth) {
             if (words.size() == 1 && words.at(0) == "LIST") {
                 std::string list = inv.listItems();
@@ -126,8 +143,8 @@ int main(int argc, char* argv[]) {
     server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     server_addr.sin_port = htons(atoi(argv[1]));
 
-    /* Bind the socket with the address the server is going to listen on, if the
-    process failed then close the socket */
+    /* Bind the socket with the address the server is going to
+    listen on, if the process failed then close the socket */
     if (bind(server_fd, (sockaddr*) & server_addr, sizeof(server_addr))) {
         cerr << "Bind failed, port still not released by the operating system\n";
         close(server_fd);

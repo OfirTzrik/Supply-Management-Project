@@ -54,14 +54,15 @@ void InventoryManager::returnItem(int itemId, const string& username) {
     // Search for the item with ID itemId in the inventory
     try {
         Item& itm = findItemById(itemId);
-        mtx.lock();
+        lock_guard<mutex> guard(mtx);
+        // mtx.lock();
         itm.returnBack(username);
-        mtx.unlock();
+        cv.notify_all();
+        // mtx.unlock();
         return;
     } catch (const runtime_error& msg) {
-        cerr << msg.what() << "\n";
-        mtx.unlock();
-        return;
+        // mtx.unlock();
+        throw runtime_error(msg.what());
     }
 
     // Item with ID itemId does not exist
@@ -72,6 +73,9 @@ void InventoryManager::returnItem(int itemId, const string& username) {
 void InventoryManager::waitUntilAvailable(int itemId, const string& username) {
     try {
         Item& itm = findItemById(itemId);
+        if (itm.getBorrower() == username) {
+            throw runtime_error("ERR DEADLOCK " + to_string(itemId));
+        }
 
         // Client will keep waiting until available
         unique_lock<mutex> ulock(mtx);
@@ -81,8 +85,9 @@ void InventoryManager::waitUntilAvailable(int itemId, const string& username) {
         }
 
     } catch (const runtime_error& msg) {
-        cerr << msg.what() << "\n";
-        return;
+        // cerr << msg.what() << "\n";
+        // return;
+        throw runtime_error(msg.what());
     }
 
     

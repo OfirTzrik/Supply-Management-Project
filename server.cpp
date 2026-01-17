@@ -78,7 +78,7 @@ bool authenticationLoop(vector<string>& words, bool& auth, int client_fd, string
 }
 
 void handle_client(int client_fd, InventoryManager& inv) {
-    send_all(client_fd, "Type commands: HELLO <username>, LIST, BORROW <id>, WAIT <id>\n");
+    send_all(client_fd, "Type commands: QUIT, HELLO <username>, LIST, BORROW <id>, WAIT <id>\n");
 
     string message_buffer;
     bool auth = false;
@@ -124,8 +124,24 @@ void handle_client(int client_fd, InventoryManager& inv) {
                 } catch (const runtime_error& msg) {
                     send_all(client_fd, string(msg.what()) + '\n');
                 }
+            } else if (words.size() == 2 && words.at(0) == "RETURN") {
+                int itemId = atoi(words.at(1).c_str());
+                try {
+                    inv.returnItem(itemId, username);
+                    send_all(client_fd, "OK RETURNED " + to_string(itemId) + "\n");
+                } catch (const runtime_error& msg) {
+                    send_all(client_fd, string(msg.what()) + '\n');
+                }
+            } else if (words.size() == 2 && words.at(0) == "WAIT") {
+                int itemId = atoi(words.at(1).c_str());
+                try {
+                    inv.waitUntilAvailable(itemId, username);
+                    send_all(client_fd, "OK AVAILABLE " + to_string(itemId) + "\n");
+                } catch (const runtime_error& msg) {
+                    send_all(client_fd, string(msg.what()) + '\n');
+                }
             } else {
-                send_all(client_fd, "WTF IS GOING ON\n");
+                send_all(client_fd, "ERR INVALID COMMAND unknown or incomplete\n");
             }
         }
 

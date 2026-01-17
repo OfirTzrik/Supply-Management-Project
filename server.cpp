@@ -69,9 +69,9 @@ bool authenticationLoop(vector<string>& words, bool& auth, int client_fd, string
             return true;
         // Client did not authenticate
         } else if (words.at(0) == "LIST" || words.at(0) == "BORROW" || words.at(0) == "WAIT") {
-            send_all(client_fd, "ERR: User is not yet authenticated\n");
+            send_all(client_fd, "ERR STATE not_authenticated\n");
         } else {
-            send_all(client_fd, "ERR: Invalid command \'" + message_buffer + "\'\n");
+            send_all(client_fd, "ERR INVALID COMMAND \'" + message_buffer + "\'\n");
         }
     }
     return false;
@@ -116,6 +116,14 @@ void handle_client(int client_fd, InventoryManager& inv) {
             if (words.size() == 1 && words.at(0) == "LIST") {
                 std::string list = inv.listItems();
                 send_all(client_fd, list);
+            } else if (words.size() == 2 && words.at(0) == "BORROW") {
+                int itemId = atoi(words.at(1).c_str());
+                try {
+                    inv.borrowItem(itemId, username);
+                    send_all(client_fd, "OK BORROWED " + to_string(itemId) + "\n");
+                } catch (const runtime_error& msg) {
+                    send_all(client_fd, string(msg.what()) + '\n');
+                }
             } else {
                 send_all(client_fd, "WTF IS GOING ON\n");
             }

@@ -41,9 +41,8 @@ void InventoryManager::borrowItem(int itemId, const string& username) {
         mtx.unlock();
         return;
     } catch (const runtime_error& msg) {
-        cerr << msg.what() << "\n";
         mtx.unlock();
-        return;
+        throw runtime_error(msg.what());
     }
 
     // Item with ID itemId does not exist

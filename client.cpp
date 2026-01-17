@@ -83,10 +83,6 @@ int main(int argc, char const *argv[]) {
     while(true){
         string sentence;
         getline(cin, sentence) ;
-        if (sentence == "")
-        {
-            break;
-        }
 
         string msg = sentence + "\n";
         send_all(fd, msg);
@@ -98,7 +94,7 @@ int main(int argc, char const *argv[]) {
         }
         cout << reply << endl;
 
-        if (sentence == "QUIT") break;
+        if (sentence == "QUIT" || sentence == "") break;
     }
 
     close(fd);

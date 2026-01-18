@@ -13,7 +13,7 @@ using namespace std;
 const int gNumClients = 5;
 
 // Receive the string character by character
-bool recv_line(int fd, std::string& out) {
+bool recv_line(int fd, string& out) {
     out.clear();
     char c;
     while (true) {
@@ -32,7 +32,7 @@ bool recv_line(int fd, std::string& out) {
 }
 
 // Send the answer character by character
-void send_all(int fd, const std::string& msg) {
+void send_all(int fd, const string& msg) {
     size_t sent = 0;
     // Keep going as long as there is something to send
     while (sent < msg.size()) {

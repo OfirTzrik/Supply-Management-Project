@@ -46,7 +46,7 @@ void send_all(int fd, const string& msg) {
 }
 
 // Handle empty messages from the client and the QUIT command
-bool disconnect_client(vector<string>& words, int client_fd) {
+bool disconnect_client(const vector<string>& words, int client_fd) {
     if (words.size() == 0 || words.at(0) == "QUIT") {
         send_all(client_fd, "OK BYE\n");
         cout << "Client disconnected\n";
@@ -59,7 +59,7 @@ bool disconnect_client(vector<string>& words, int client_fd) {
 /* As long at the client did not authenticate they will only
 have the HELLO command available to them, otherwise every other
 command is not available */
-bool authentication_loop(vector<string>& words, bool& auth, int client_fd, string& username, const string& message_buffer) {
+bool authentication_loop(const vector<string>& words, bool& auth, int client_fd, string& username, const string& message_buffer) {
     if (!auth) {
         // Client authenticated
         if (words.size() == 2 && words.at(0) == "HELLO") {
@@ -79,7 +79,7 @@ bool authentication_loop(vector<string>& words, bool& auth, int client_fd, strin
 
 /* Let the users execute commands that are available to them
 after completing authentication with HELLO <username> */
-void execute_commands(vector<string>& words, InventoryManager& inv, string& username, int client_fd) {
+void execute_commands(const vector<string>& words, InventoryManager& inv, const string& username, int client_fd) {
     // Commands with 1 part (Only LIST)
     if (words.size() == 1 && words.at(0) == "LIST") {
         std::string list = inv.listItems();

@@ -46,7 +46,7 @@ void send_all(int fd, const std::string& msg) {
 }
 
 // Handle empty messages from the client and the QUIT command
-bool disconnectClient(vector<string>& words, int client_fd) {
+bool disconnect_client(vector<string>& words, int client_fd) {
     if (words.size() == 0 || words.at(0) == "QUIT") {
         send_all(client_fd, "OK BYE\n");
         cout << "Client disconnected\n";
@@ -59,7 +59,7 @@ bool disconnectClient(vector<string>& words, int client_fd) {
 /* As long at the client did not authenticate they will only
 have the HELLO command available to them, otherwise every other
 command is not available */
-bool authenticationLoop(vector<string>& words, bool& auth, int client_fd, string& username, const string& message_buffer) {
+bool authentication_loop(vector<string>& words, bool& auth, int client_fd, string& username, const string& message_buffer) {
     if (!auth) {
         // Client authenticated
         if (words.size() == 2 && words.at(0) == "HELLO") {
@@ -75,6 +75,39 @@ bool authenticationLoop(vector<string>& words, bool& auth, int client_fd, string
         }
     }
     return false;
+}
+
+/* Let the users execute commands that are available to them
+after completing authentication with HELLO <username> */
+void execute_commands(vector<string>& words, InventoryManager& inv, string& username, int client_fd) {
+    // Commands with 1 part (Only LIST)
+    if (words.size() == 1 && words.at(0) == "LIST") {
+        std::string list = inv.listItems();
+        send_all(client_fd, list);
+    // Commands with 2 parts
+    } else if (words.size() == 2) {
+        try {
+            int itemId = atoi(words.at(1).c_str());
+            if (words.at(0) == "BORROW") {
+                inv.borrowItem(itemId, username);
+                send_all(client_fd, "OK BORROWED " + to_string(itemId) + "\n");
+            } else if (words.at(0) == "RETURN") {
+                inv.returnItem(itemId, username);
+                send_all(client_fd, "OK RETURNED " + to_string(itemId) + "\n");
+            } else if (words.at(0) == "WAIT") {
+                inv.waitUntilAvailable(itemId, username);
+                send_all(client_fd, "OK AVAILABLE " + to_string(itemId) + "\n");
+            // Unknown or incomplete commands
+            } else {
+                send_all(client_fd, "ERR INVALID COMMAND unknown or incomplete\n");
+            }
+        } catch (const runtime_error& msg) {
+            send_all(client_fd, string(msg.what()) + '\n');
+        }
+    // Unknown or incomplete commands
+    } else {
+        send_all(client_fd, "ERR INVALID COMMAND unknown or incomplete\n");
+    }
 }
 
 void handle_client(int client_fd, InventoryManager& inv) {
@@ -101,50 +134,21 @@ void handle_client(int client_fd, InventoryManager& inv) {
 
         /* Handle empty messages (which results in empty words vector)
         and also handle the client sending "QUIT" */
-        if (disconnectClient(words, client_fd)) {
+        if (disconnect_client(words, client_fd)) {
             return;
         }
 
         /* Authenticate the client once they use HELLO <username>,
         otherwise they are "stuck" here */
-        if (authenticationLoop(words, auth, client_fd, username, message_buffer)) {
+        if (authentication_loop(words, auth, client_fd, username, message_buffer)) {
             continue;
         }
 
-        // User is already authenticated
+        /* Execute commands that are available to the user after authentication,
+        unknown or incomplete commands are answered accordingly */
         if (auth) {
-            if (words.size() == 1 && words.at(0) == "LIST") {
-                std::string list = inv.listItems();
-                send_all(client_fd, list);
-            } else if (words.size() == 2 && words.at(0) == "BORROW") {
-                int itemId = atoi(words.at(1).c_str());
-                try {
-                    inv.borrowItem(itemId, username);
-                    send_all(client_fd, "OK BORROWED " + to_string(itemId) + "\n");
-                } catch (const runtime_error& msg) {
-                    send_all(client_fd, string(msg.what()) + '\n');
-                }
-            } else if (words.size() == 2 && words.at(0) == "RETURN") {
-                int itemId = atoi(words.at(1).c_str());
-                try {
-                    inv.returnItem(itemId, username);
-                    send_all(client_fd, "OK RETURNED " + to_string(itemId) + "\n");
-                } catch (const runtime_error& msg) {
-                    send_all(client_fd, string(msg.what()) + '\n');
-                }
-            } else if (words.size() == 2 && words.at(0) == "WAIT") {
-                int itemId = atoi(words.at(1).c_str());
-                try {
-                    inv.waitUntilAvailable(itemId, username);
-                    send_all(client_fd, "OK AVAILABLE " + to_string(itemId) + "\n");
-                } catch (const runtime_error& msg) {
-                    send_all(client_fd, string(msg.what()) + '\n');
-                }
-            } else {
-                send_all(client_fd, "ERR INVALID COMMAND unknown or incomplete\n");
-            }
+            execute_commands(words, inv, username, client_fd);
         }
-
     }
 }
 

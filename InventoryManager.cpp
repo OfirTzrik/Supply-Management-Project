@@ -55,13 +55,10 @@ void InventoryManager::returnItem(int itemId, const string& username) {
     try {
         Item& itm = findItemById(itemId);
         lock_guard<mutex> guard(mtx);
-        // mtx.lock();
         itm.returnBack(username);
         cv.notify_all();
-        // mtx.unlock();
         return;
     } catch (const runtime_error& msg) {
-        // mtx.unlock();
         throw runtime_error(msg.what());
     }
 
@@ -85,8 +82,6 @@ void InventoryManager::waitUntilAvailable(int itemId, const string& username) {
         }
 
     } catch (const runtime_error& msg) {
-        // cerr << msg.what() << "\n";
-        // return;
         throw runtime_error(msg.what());
     }
 

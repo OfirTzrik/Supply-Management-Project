@@ -36,12 +36,13 @@ void InventoryManager::borrowItem(int itemId, const string& username) {
     // Search for the item with ID itemId in the inventory
     try {
         Item& itm = findItemById(itemId);
-        mtx.lock();
+        lock_guard<mutex> guard(mtx);
+        // mtx.lock();
         itm.borrow(username);
-        mtx.unlock();
+        // mtx.unlock();
         return;
     } catch (const runtime_error& msg) {
-        mtx.unlock();
+        // mtx.unlock();
         throw runtime_error(msg.what());
     }
 

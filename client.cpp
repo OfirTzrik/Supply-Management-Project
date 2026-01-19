@@ -1,7 +1,6 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <unistd.h>
-
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -19,14 +18,18 @@ bool recv_line(int fd, string& out) {
         if (c == '\n') break;
         out.push_back(c);
     }
+
+    // Split the string received (for LIST)
     istringstream iss(out);
     vector<string> words;
     string w;
     while (iss >> w) {
         words.push_back(w);
     }
+    // If is the the feedback from LIST, get the number of rows
     if (words.size() == 3)
     {
+        // Read N more times
         int count = 0;
         if(words[1] == "LIST"){
             out.push_back('\n');
@@ -51,42 +54,47 @@ void send_all(int fd, const string& msg) {
     }
 }
 
-
 int main(int argc, char const *argv[]) {
     if (argc < 3){
-    cout << "missing values";
-    return 0;
+        cout << "missing values";
+        return 0;
     }
     string ip = (argv[1]);
     int port = atoi(argv[2]);
 
-    // start the connection 
-
     int fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0) {
+        cerr << "ERR: Failed to create socket\n";
+        return 1;
+    }
 
     sockaddr_in srv{};
     srv.sin_family = AF_INET;
     srv.sin_port = htons(port);
     inet_pton(AF_INET, ip.c_str() , &srv.sin_addr);
 
+    // Start the connection 
     if (connect(fd, (sockaddr*)&srv, sizeof(srv)) < 0){
         cerr << "Server not found";
         close(fd);
         return 0;
     }
     cout << "Connected to " << ip << ":" << to_string(port) << endl;
+    // Receive initial message from the server about available commands
     string reply;
     recv_line(fd, reply);
     cout << reply << endl;
     
-    // sending messeges 
+    // Sending messeges 
     while(true){
         string sentence;
         getline(cin, sentence) ;
 
+        // Send message to the client
         string msg = sentence + "\n";
         send_all(fd, msg);
 
+        // Receive response back
         string reply;
         if (!recv_line(fd, reply) && sentence != "QUIT"){
             cerr << "Disconnected from server";
@@ -94,10 +102,10 @@ int main(int argc, char const *argv[]) {
         }
         cout << reply << endl;
 
+        /* Quit or empty message was sent to the server
+        receive disconnect message and then quit */
         if (sentence == "QUIT" || sentence == "") break;
     }
 
     close(fd);
-
-
 }

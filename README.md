@@ -1,4 +1,4 @@
-Supply Management Project (Rent It) by OfirTzrik and OmerAzrai.
+Supply Management Project (Rent It) by OfirTzrik and OmerAzrai for the "Intro to Systems Programming" course.
 
 Compile and run server with:
 ```bash
